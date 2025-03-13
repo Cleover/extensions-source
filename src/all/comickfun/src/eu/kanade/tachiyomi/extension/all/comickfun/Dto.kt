@@ -193,8 +193,8 @@ class Chapter(
     private val chap: String = "",
     private val vol: String = "",
     @SerialName("group_name") val groups: List<String> = emptyList(),
-    val up_count: Int = 0,
-    val down_count: Int = 0,
+    @SerialName("up_count") val upCount: Int = 0,
+    @SerialName("down_count") val downCount: Int = 0,
 ) {
     fun toSChapter(mangaUrl: String) = SChapter.create().apply {
         url = "$mangaUrl/$hid-chapter-$chap-$lang"
