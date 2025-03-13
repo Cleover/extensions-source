@@ -93,6 +93,20 @@ abstract class Comick(
         }.also(screen::addPreference)
 
         SwitchPreferenceCompat(screen.context).apply {
+            key = SHOW_CHAPTER_VOTES_PREF
+            title = intl["show_chapter_votes_title"]
+            summaryOn = intl["show_chapter_votes_on"]
+            summaryOff = intl["show_chapter_votes_off"]
+            setDefaultValue(SHOW_CHAPTER_VOTES_DEFAULT)
+
+            setOnPreferenceChangeListener { _, newValue ->
+                preferences.edit()
+                    .putBoolean(SHOW_CHAPTER_VOTES_PREF, newValue as Boolean)
+                    .commit()
+            }
+        }.also(screen::addPreference)
+
+        SwitchPreferenceCompat(screen.context).apply {
             key = INCLUDE_MU_TAGS_PREF
             title = intl["include_tags_title"]
             summaryOn = intl["include_tags_on"]
@@ -171,6 +185,9 @@ abstract class Comick(
 
     private val SharedPreferences.showAlternativeTitles: Boolean
         get() = getBoolean(SHOW_ALTERNATIVE_TITLES_PREF, SHOW_ALTERNATIVE_TITLES_DEFAULT)
+
+    private val SharedPreferences.showChapterVotes: Boolean
+        get() = getBoolean(SHOW_CHAPTER_VOTES_PREF, SHOW_CHAPTER_VOTES_DEFAULT)
 
     private val SharedPreferences.includeMuTags: Boolean
         get() = getBoolean(INCLUDE_MU_TAGS_PREF, INCLUDE_MU_TAGS_DEFAULT)
@@ -495,7 +512,13 @@ abstract class Comick(
 
                 publishedChapter && noGroupBlock
             }
-            .map { it.toSChapter(mangaUrl) }
+            .map { chapter ->
+                chapter.toSChapter(mangaUrl).apply {
+                    if (preferences.showChapterVotes) {
+                        name = "$name (${chapter.up_count - chapter.down_count}↑)"
+                    }
+                }
+            }
     }
 
     private val publishedDateFormat =
@@ -563,6 +586,8 @@ abstract class Comick(
         private const val IGNORED_GROUPS_PREF = "IgnoredGroups"
         private const val SHOW_ALTERNATIVE_TITLES_PREF = "ShowAlternativeTitles"
         const val SHOW_ALTERNATIVE_TITLES_DEFAULT = false
+        private const val SHOW_CHAPTER_VOTES_PREF = "ShowChapterVotes"
+        const val SHOW_CHAPTER_VOTES_DEFAULT = false
         private const val INCLUDE_MU_TAGS_PREF = "IncludeMangaUpdatesTags"
         const val INCLUDE_MU_TAGS_DEFAULT = false
         private const val GROUP_TAGS_PREF = "GroupTags"
